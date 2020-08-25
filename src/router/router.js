@@ -37,11 +37,23 @@ class RouterTable {
 
 import Html5Mode from "./history/html5"
 
+const registerHooks = (hooks, fn) => {
+  hooks.push(fn)
+  return () => {
+    const i = hooks.indexOf(fn)
+    if (i > -1) hooks.splice(i, 1)
+  }
+}
 export default class Router {
   constructor({ routes = [] }) {
     this.routerTable = new RouterTable(routes)
     this.history = new Html5Mode(this)
+
+    this.beforeHooks = []
+    this.resolveHooks = []
+    this.afterHooks = []
   }
+
   init(app) {
     const { history } = this
     history.listen(route => {
@@ -49,21 +61,32 @@ export default class Router {
     })
     history.transitionTo(history.getCurrentLoaction())
   }
+
   push(to) {
     this.history.push(to)
+  }
+
+  beforeEach(fn) {
+    return registerHooks(this.beforeHooks, fn)
+  }
+  beforeResolve(fn) {
+    return registerHooks(this.resolveHooks, fn)
+  }
+  afterEach(fn) {
+    return registerHooks(this.afterHooks, fn)
   }
 }
 
 Router.install = function() {
   Vue.mixin({
     beforeCreate() {
-      if (this.$options.router !== undefined) {
+      if (this.$options.router === undefined) {
+        this._routerRoot = this.$parent?._routerRoot
+      } else {
         this._routerRoot = this
         this._router = this.$options.router
         this._router.init(this)
         Vue.util.defineReactive(this, "_route", this._router.history.current)
-      } else {
-        this._routerRoot = this.$parent && this.$parent._routerRoot
       }
     }
   })
