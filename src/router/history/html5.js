@@ -8,11 +8,11 @@ export default class Html5History extends BaseHistory {
 
   initListener() {
     window.addEventListener("popstate", () => {
-      this.transitionTo(this.getCurrentLoaction())
+      this.transitionTo(this.getCurrentLocation())
     })
   }
 
-  getCurrentLoaction() {
+  getCurrentLocation() {
     let path = decodeURI(window.location.pathname) || "/"
     return path + window.location.search + window.location.hash
   }

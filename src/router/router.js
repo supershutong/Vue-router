@@ -59,7 +59,7 @@ export default class Router {
     history.listen(route => {
       app._route = route
     })
-    history.transitionTo(history.getCurrentLoaction())
+    history.transitionTo(history.getCurrentLocation())
   }
 
   push(to) {
